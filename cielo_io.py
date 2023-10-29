@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """IO utilities for Cielo game.
 
 Everything outside of here should be relatively platform-agnostic - only this module
