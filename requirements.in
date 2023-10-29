@@ -1,0 +1,2 @@
+inquirer           # Just needed for IO test
+RPi.GPIO==0.7.1a4  # Potentially more specific than needed, but matching IO in system setup
