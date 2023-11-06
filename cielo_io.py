@@ -61,9 +61,9 @@ class LatestTimes:
     This does NOT include logic like 'yes crossed beams but then you hit,
     so the end result is just a hit (bad)' - it just gives raw latest times.
     """
-    hit: Optional[datetime.datetime]
-    lower_beam_cross: Optional[datetime.datetime]
-    upper_beam_cross: Optional[datetime.datetime]
+    hit: Optional[datetime.datetime] = None
+    lower_beam_cross: Optional[datetime.datetime] = None
+    upper_beam_cross: Optional[datetime.datetime] = None
 
 
 # Time that the module has last been touched by ball
@@ -187,5 +187,9 @@ class Interface:
             self.all_off()
             self._kill_par_thread = True
         finally:
-            GPIO.cleanup()
+            try:
+                GPIO.cleanup()
+            except Exception as ex:
+                print(f"Error {ex} cleaning up GPIO.")
+                pass  # Assume already cleaned up
 

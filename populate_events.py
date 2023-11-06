@@ -147,4 +147,14 @@ def populate_events() -> None:
 
 
 if __name__ == "__main__":
-    populate_events()
+    # Run stuff and whatever happens, clean up (stop threads, reset IO, etc.)
+    try:
+        populate_events()
+    except Exception as ex:
+        print(f"Caught exception {ex}, still cleaning up IO...")
+    except SystemExit as _:
+        # Click throws this on Ctl-C, catch separately as inherits from BaseException
+        print(f"Cleaning up IO...")
+    finally:
+        CieloIO().cleanup()
+        print("Done cleaning up.")
