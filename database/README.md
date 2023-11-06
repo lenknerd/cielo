@@ -26,7 +26,8 @@ Log in and create the tables in the public schema;
     );
     CREATE TABLE games (
       t_start TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      duration_seconds INT,
-      user VARCHAR(50)
+      duration_seconds INT NOT NULL DEFAULT 60,
+      user VARCHAR(50),
+      end_score INT
     );
     -- user isn't used currently
