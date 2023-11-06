@@ -4,12 +4,12 @@
 import time
 from dataclasses import asdict
 from enum import Enum
-from typing import Final
+from typing import Final, Optional
 
 import click
 import mariadb
 
-from cielo_io import CieloIO, LatestTimes, LED
+from cielo_io import Interface as CieloIO, LatestTimes, LED
 
 
 # Yeah auth is not a thing in this right now
