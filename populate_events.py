@@ -54,12 +54,12 @@ _NET_EVENT_LED_SIGNIFIERS: Final = {
 _LED_DUR_S: Final = 2
 
 
-def get_net_event(times: LatestTimes, ref_time) -> Optional[NetEvent]:
+def get_net_event(times: LatestTimes, ref_time: float) -> Optional[NetEvent]:
     """Decide which thing is most relevant (see above event window example).
 
     Arguments:
         times: The latest times things happened.
-        ref_time: The reference time (basically now, but pass in anyway)
+        ref_time: The reference time of "now" (stamp from time.time())
 
     Returns:
         The relevant net event
@@ -79,7 +79,9 @@ def get_net_event(times: LatestTimes, ref_time) -> Optional[NetEvent]:
     return None
 
 
-def handle_cycle(db_cur, io_interf: CieloIO, times: LatestTimes) -> LatestTimes:
+def handle_cycle(db_cur: mariadb.cursors.Cursor,
+                 io_interf: CieloIO,
+                 times: LatestTimes) -> LatestTimes:
     """Handle one cycle of the read/process loop.
 
     Arguments:
