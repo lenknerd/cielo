@@ -21,12 +21,12 @@ Log in and create the tables in the public schema;
     USE cielo;
     CREATE TABLE events (
       kind VARCHAR(20) NOT NULL,
-      t_ref TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      t_end TIMESTAMP
+      t_ref FLOAT NOT NULL,
+      t_end FLOAT
     );
     CREATE TABLE games (
-      t_start TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      duration_seconds INT NOT NULL DEFAULT 60,
+      t_start FLOAT NOT NULL,
+      duration_seconds FLOAT NOT NULL DEFAULT 60,
       user VARCHAR(50),
       end_score INT
     );
