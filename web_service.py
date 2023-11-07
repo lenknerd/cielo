@@ -34,3 +34,6 @@ def run(debug: bool, port: int, host: Optional[str]) -> None:
     app.logger.info("Running Cielo web server.")
     app.run(port=port, host=host)
 
+
+if __name__ == "__main__":
+    run()
