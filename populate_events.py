@@ -98,7 +98,8 @@ def get_net_event(times: LatestTimes, ref_time: float) -> Optional[Tuple[NetEven
 
 def handle_cycle(db_cur: mariadb.cursors.Cursor,
                  io_interf: CieloIO,
-                 times: LatestTimes) -> LatestTimes:
+                 times: LatestTimes,
+                 con) -> LatestTimes:
     """Handle one cycle of the read/process loop.
 
     Arguments:
@@ -124,6 +125,7 @@ def handle_cycle(db_cur: mariadb.cursors.Cursor,
             # Record the event in the database for use in webapp
             db_cur.execute("INSERT INTO events (kind, t_ref)"
                            f"VALUES ('{relevant_event.name}', {event_tstamp})")
+            con.commit()
             print("Processed the event, report times as current (processed) state")
             return new_read_of_times
         else:
@@ -155,7 +157,7 @@ def populate_events() -> None:
             print(f"Loop iteration {loop_iter}")
 
         # All the action is in here
-        times = handle_cycle(db_cur, io_interf, times)
+        times = handle_cycle(db_cur, io_interf, times, db_conn)
 
         time.sleep(_CHECK_PERIOD_S)
 

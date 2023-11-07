@@ -7,7 +7,6 @@ Interface to this module is a singleton class, Interface. Key methods:
     Interface.get_latest_times() # To check latest times of beam crosses or contact
     Interface.set_on_for(LED, sec)  # Non-blocking, parallel thread turns off)
 """
-import datetime
 import logging
 import sys
 import threading
@@ -26,8 +25,8 @@ _PIN_NUMBERING_SYSTEM: Final = GPIO.BCM  # Either okay, diagrams I've seen so fa
 
 # Pins 3 and 4 have built-in pull-up resistors - important for the beam sensors
 # See https://www.adafruit.com/product/2168
-_UPPER_BEAM_SENSOR_INPUT_PIN: Final = 4
-_LOWER_BEAM_SENSOR_INPUT_PIN: Final = 3
+_UPPER_BEAM_SENSOR_INPUT_PIN: Final = 3
+_LOWER_BEAM_SENSOR_INPUT_PIN: Final = 4
 
 # Pin 19 per same page has a pull-down, also set in code here but PD by default
 _TOUCH_SENSOR_INPUT_PIN: Final = 19
@@ -58,20 +57,22 @@ _OFF: Final = 0
 class LatestTimes:
     """The last times at which each thing happened to beam or hit sensors.
 
+    Times are all float seconds since epoch.
+
     This does NOT include logic like 'yes crossed beams but then you hit,
     so the end result is just a hit (bad)' - it just gives raw latest times.
     """
-    hit: Optional[datetime.datetime] = None
-    lower_beam_cross: Optional[datetime.datetime] = None
-    upper_beam_cross: Optional[datetime.datetime] = None
+    hit: Optional[float] = None
+    lower_beam_cross: Optional[float] = None
+    upper_beam_cross: Optional[float] = None
 
 
 # Time that the module has last been touched by ball
-_T_OF_LAST_HIT: Optional[datetime.datetime] = None
+_T_OF_LAST_HIT: Optional[float] = None
 # Time of last beam interrupt of lower down beam
-_T_OF_LAST_LOWER_BEAM_CROSS: Optional[datetime.datetime] = None
+_T_OF_LAST_LOWER_BEAM_CROSS: Optional[float] = None
 # Time of last interrupt of higher up beam
-_T_OF_LAST_UPPER_BEAM_CROSS: Optional[datetime.datetime] = None
+_T_OF_LAST_UPPER_BEAM_CROSS: Optional[float] = None
 
 
 # Interrupt callback functions - each one is only modifier of above globals
@@ -79,19 +80,19 @@ _T_OF_LAST_UPPER_BEAM_CROSS: Optional[datetime.datetime] = None
 def _broken_upper_beam_callback(channel) -> None:
     print("Broke upper beam!")
     global _T_OF_LAST_UPPER_BEAM_CROSS
-    _T_OF_LAST_UPPER_BEAM_CROSS = datetime.datetime.now()
+    _T_OF_LAST_UPPER_BEAM_CROSS = time.time()
 
 
 def _broken_lower_beam_callback(channel) -> None:
     print("Broke lower beam!")
     global _T_OF_LAST_LOWER_BEAM_CROSS
-    _T_OF_LAST_LOWER_BEAM_CROSS = datetime.datetime.now()
+    _T_OF_LAST_LOWER_BEAM_CROSS = time.time()
 
 
 def _sensor_hit_callback(channel) -> None:
     print("Detected sensor hit!")
     global _T_OF_LAST_HIT
-    _T_OF_LAST_HIT = datetime.datetime.now()
+    _T_OF_LAST_HIT = time.time()
 
 
 class Interface:
@@ -112,8 +113,8 @@ class Interface:
 
             GPIO.setmode(_PIN_NUMBERING_SYSTEM)
 
-            # LED setpoint and state setup
-            self._setpoints: Mapping[LED, Optional[datetime.datetime]] = {
+            # LED setpoint and state setup. Vals are time to go off, if on.
+            self._setpoints: Mapping[LED, Optional[float]] = {
                     color: None for color in LED}
 
             for led in LED:  # LED enum values are pin numbers
@@ -153,7 +154,7 @@ class Interface:
     def set_on_for(self, n_seconds: float, color: LED) -> None:
         """Set a particular LED on for N seconds (puts setpoint and turns on)."""
         with _io_mod_lock:
-            self._setpoints[color] = datetime.datetime.now() + datetime.timedelta(0, n_seconds)
+            self._setpoints[color] = time.time() + n_seconds
             GPIO.output(color.value, _ON)
 
     def upkeep(self) -> None:
@@ -161,7 +162,7 @@ class Interface:
         # Make par thread
         with _io_mod_lock:
             for led, turn_off_time in self._setpoints.items():
-                if turn_off_time and turn_off_time <= datetime.datetime.now():
+                if turn_off_time and turn_off_time <= time.time():
                     GPIO.output(led.value, _OFF)
                     self._setpoints[led] = None
 
