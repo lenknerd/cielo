@@ -4,7 +4,6 @@
 import time
 import traceback
 from dataclasses import asdict
-from datetime import datetime
 from enum import Enum
 from typing import Final, Optional, Tuple
 
@@ -68,28 +67,24 @@ def get_net_event(times: LatestTimes, ref_time: float) -> Optional[Tuple[NetEven
     Returns:
         The relevant net event, and the timestamp at which occurred
     """
-    _none_or_tstamp = lambda dt : None if dt is None else datetime.timestamp(dt)
-    hit_tstamp = _none_or_tstamp(times.hit)
-    low_tstamp = _none_or_tstamp(times.lower_beam_cross)
-    hi_tstamp = _none_or_tstamp(times.upper_beam_cross) if times.upper_beam_cross else None
-    nonnull_times = [t for t in [hit_tstamp, low_tstamp, hi_tstamp]  if t]
-    if len(nonnull_times) == 0:
+    nonnull_ts = [t for t in [times.hit, times.lower_beam_cross, times.upper_beam_cross]  if t]
+    if len(nonnull_ts) == 0:
         raise ValueError("Only call get_net_event if something has happened.")
 
-    latest_thing_tstamp = max(nonnull_times)
+    latest_thing_tstamp = max(nonnull_ts)
     t_ago_s = ref_time - latest_thing_tstamp
     if t_ago_s < _EVENT_WINDOW_S:
         # It hasn't been long enough to conclude what happened... let dust settle
         return None
 
     # If it hit, doesn't matter if other beams crossed (prioritize hit)
-    if hit_tstamp and ref_time - hit_tstamp < _EVENT_WINDOW_S * 2:
+    if times.hit and ref_time - times.hit < _EVENT_WINDOW_S * 2:
         return (NetEvent.HIT, latest_thing_tstamp)
     # Next prioritize upper beam - went through lower to get to the upper, no hit
-    if hi_tstamp and ref_time - hi_tstamp < _EVENT_WINDOW_S * 2:
+    if times.upper_beam_cross and ref_time - times.upper_beam_cross < _EVENT_WINDOW_S * 2:
         return (NetEvent.UPPER, latest_thing_tstamp)
     # Lastly check for lower beam
-    if low_tstamp and ref_time - low_tstamp < _EVENT_WINDOW_S * 2:
+    if times.lower_beam_cross and ref_time - times.lower_beam_cross < _EVENT_WINDOW_S * 2:
         return (NetEvent.LOWER, latest_thing_tstamp)
 
     # This should generally not happen... didn't call frequently enough
