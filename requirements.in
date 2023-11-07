@@ -1,4 +1,5 @@
 click              # Helper for command-line tool niceties
+flask              # For the web app server
 inquirer           # Just needed for IO test
 mariadb            # Persistence via mySQL-like DB
 RPi.GPIO==0.7.1a4  # Potentially more specific than needed, but matching IO in system setup
