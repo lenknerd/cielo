@@ -8,19 +8,10 @@ from enum import Enum
 from typing import Final, Optional, Tuple
 
 import click
-import mariadb
 
 from cielo_io import Interface as CieloIO, LatestTimes, LED
+from models import Handler, get_handler, store_event
 
-
-# Yeah auth is not a thing in this right now
-_CONN_INFO: Final = {
-    "user": "cielo",
-    "password": "cielo",
-    "database": "cielo",
-    "port": 3306,
-    "host": "localhost",
-}
 
 # How often to look at latest times and update LEDs and DB accordingly
 _CHECK_PERIOD_S: Final = 0.2
@@ -91,7 +82,7 @@ def get_net_event(times: LatestTimes, ref_time: float) -> Optional[Tuple[NetEven
     raise RuntimeError("In get_net_event, didn't find anything to handle.")
 
 
-def handle_cycle(db_cur: mariadb.cursors.Cursor,
+def handle_cycle(db_handler: Handler,
                  io_interf: CieloIO,
                  times: LatestTimes,
                  con) -> LatestTimes:
@@ -118,9 +109,8 @@ def handle_cycle(db_cur: mariadb.cursors.Cursor,
             io_interf.set_on_for(_LED_DUR_S, _NET_EVENT_LED_SIGNIFIERS[relevant_event])
 
             # Record the event in the database for use in webapp
-            db_cur.execute("INSERT INTO events (kind, t_ref)"
-                           f"VALUES ('{relevant_event.name}', {event_tstamp})")
-            con.commit()
+            store_event(db_handler, relevant_event.name, event_tstamp)
+
             print("Processed the event, report times as current (processed) state")
             return new_read_of_times
         else:
@@ -139,8 +129,7 @@ def populate_events() -> None:
     io_interf = CieloIO()
 
     print("IO ready. Connecting to database...")
-    db_conn = mariadb.connect(**_CONN_INFO)
-    db_cur = db_conn.cursor()
+    db_handler = get_handler()
 
     print("Connected. Starting measurement loop.")
     times = LatestTimes()
@@ -152,7 +141,7 @@ def populate_events() -> None:
             print(f"Loop iteration {loop_iter}")
 
         # All the action is in here
-        times = handle_cycle(db_cur, io_interf, times, db_conn)
+        times = handle_cycle(db_handler, io_interf, times, db_conn)
 
         time.sleep(_CHECK_PERIOD_S)
 

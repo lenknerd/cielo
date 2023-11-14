@@ -4,12 +4,18 @@
 import logging
 from typing import Optional
 
+import mariadb
 from flask import Flask, render_template
 
 import click
 
 
 app = Flask("cielo")
+
+
+def _start_newgame() -> None:
+    """Record a new game entry into the games table."""
+
 
 
 @app.route("/")
