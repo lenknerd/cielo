@@ -4,9 +4,10 @@
 Run directly to exercise IO in test database.
 """
 import os
+import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Final, List, Optional
+from typing import Final, List, Optional, Tuple
 
 import mariadb
 
@@ -47,10 +48,11 @@ class EventTPair:
 
 @dataclass
 class GameState:
-    """The events in the current game if any, and latest score."""
+    """The events in the latest game if any, and latest score."""
 
-    events: Optional[List[EventTPair]]  # None if no game on
+    events: List[EventTPair]
     latest_score: int
+    time_remaining_s: Optional[float]  # None if no game on
 
 
 def get_handler(override_db: Optional[str] = None) -> Handler:
@@ -76,7 +78,7 @@ def start_new_game(handler: Optional[Handler]) -> None:
     if last_g_vals:  # If there is a last game (not clean slate)
         last_g_start_t, last_g_score = next(t_last_g_vals)
         if last_g_score is None:  # If the last score is not filled in
-            latest_score = _score_latest_game(handler)
+            _, latest_score = _tally_game_w_start_t(handler, last_g_start_t)
             handler.cur.execute(f"UPDATE games SET end_score = {latest_score} "
                                 f"WHERE t_start = {last_g_start_t}")
             handler.conn.commit()
@@ -87,14 +89,15 @@ def start_new_game(handler: Optional[Handler]) -> None:
     handler.conn.commit()
 
 
-def _score_latest_game(handler: Optional[Handler]) -> int:
-    """Get the score from the latest game."""
+def _tally_game_w_start_t(handler: Optional[Handler], last_g_start_t: float
+                          ) -> Tuple[List[], int]:
+    """Get events and score from the game with the given start time."""
     # TODO write
-    return 0
+    return [], 0
 
 
 def store_event(handler: Optional[Handler],
-                event_name: str, event_tstamp: int) -> None:
+                event_name: str, event_tstamp: float) -> None:
     """Store an event in the database."""
     if not handler:
         handler = get_handler()
@@ -106,20 +109,33 @@ def store_event(handler: Optional[Handler],
 
 def get_high_score(handler: Optional[Handler]) -> int:
     """Get the highest score from the games table."""
+    if not handler:
+        handler = get_handler()
+
     vals = handler.cur.execute("SELECT MAX(end_score) FROM games")
     if vals:
         return next(val)[0]
     return 0  # No games recorded yet
 
 
-def get_state() -> GameState:
+def get_state(handler: Optional[Handler]) -> GameState:
     """Get the current game state."""
-    # TODO do it
-    return GameState(
-        events=[],
-        latest_score=_score_latest_game(),
-    )
+    if not handler:
+        handler = get_handler()
 
+    state = GameState([], 0, 0)
+
+    # Get current game start time if ongoing
+    last_g_vals = handler.cur.execute("SELECT t_start, duration_seconds FROM games "
+                                        "ORDER BY t_start DESC LIMIT 1")
+    if last_g_vals:  # If there is a last game (not clean slate)
+        last_g_start_t, last_g_dur = next(t_last_g_vals)
+        events, score = _tally_game_w_start_t(handler, last_g_start_t)
+        state.time_remaining_s = max(last_g_start_t + last_g_dur - time.time(), 0)
+        state.latest_score = score
+        # TODO fill in events
+
+    return state
 
 
 if __name__ == "__main__":
