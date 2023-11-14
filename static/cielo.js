@@ -27,16 +27,10 @@ $(".cielonewgame").click(function() {
 
 function update_status_and_feed() {
   $.ajax({
-    url: "/feed",
-    success: function(response) {
-      $(".cielofeed").html(response);
-    }
-  });
-
-  $.ajax({
-    url: "/summary",
-    success: function(response) {
-      $(".cielogamesummary").html(response);
+    url: "/state",
+    success: function(data) {
+      $(".cielofeed").html(data.feed);
+      $(".cielogamesummary").html(data.summary);
     }
   });
 }

@@ -2,7 +2,7 @@
 """The web service for the Cielo game."""
 
 import logging
-from typing import Optional
+from typing import Mapping, Optional
 
 import mariadb
 from flask import Flask, render_template
@@ -36,14 +36,17 @@ def newgame() -> str:
     return "Okay"
 
 
-@app.route("/feed")
-def feed() -> str:
-    return "Feed is going."
+@app.route("/state")
+def state() -> Mapping[str, str]:
+    """Get the state of the game - the feed and summary.
 
-
-@app.route("/summary")
-def summary() -> str:
-    return "Most recent score, or time left if game on, goes here."
+    Returns:
+        JSON-serializable {"feed": "text", "summary": "text"}
+    """
+    return {
+        "summary": "Most recent score, or time left.",
+        "feed": "Events...\nevents...\nmore events"
+    }
 
 
 @click.command()
