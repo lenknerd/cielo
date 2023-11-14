@@ -1,10 +1,14 @@
-"""Logic around storing and retrieving Cielo game and event data."""
+#!/usr/bin/env python3
+"""Logic around storing and retrieving Cielo game and event data.
 
+Run directly to exercise IO in test database.
+"""
+import os
 from dataclasses import dataclass
+from enum import Enum
+from typing import Final, List, Optional
 
-from typing import Final, Optional
-
-from populate_events import NetEvent
+import mariadb
 
 
 # Yeah auth is not a thing in Cielo right now
@@ -25,6 +29,16 @@ class Handler:
     cur: mariadb.cursors.Cursor
 
 
+class NetEvent(Enum):
+    """A net event (i.e., UPPER means crossed lower, but did NOT hit)."""
+
+    HIT = 0
+    LOWER = 1
+    UPPER = 2
+
+
+
+
 @dataclass
 class EventTPair:
     """Event and time at which it happened."""
@@ -41,8 +55,9 @@ class GameState:
     latest_score: int
 
 
-def get_handler() -> Handler:
+def get_handler(override_db: Optional[str] = None) -> Handler:
     """Connect to the database and open cursor."""
+    conn_info = {**_CONN_INFO, "database": override_db} if override_db else _CONN_INFO
     db_conn = mariadb.connect(**_CONN_INFO)
     db_cur = db_conn.cursor()
     return Handler(db_conn, db_cur)
@@ -78,3 +93,8 @@ def get_high_score(handler: Optional[Handler]) -> int:
 
 def get_state() -> GameState:
     """Get the current game state."""
+    pass
+
+
+if __name__ == "__main__":
+    print("Hi.")

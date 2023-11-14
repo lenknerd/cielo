@@ -34,3 +34,5 @@ Log in and create the tables in the public schema;
 
     -- Also useful for getting latest events in order
     ALTER TABLE events ADD INDEX (t_ref);
+
+Create the same things in a `cielo_test` database as well to test stuff.

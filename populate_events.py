@@ -4,13 +4,12 @@
 import time
 import traceback
 from dataclasses import asdict
-from enum import Enum
 from typing import Final, Optional, Tuple
 
 import click
 
 from cielo_io import Interface as CieloIO, LatestTimes, LED
-from models import Handler, get_handler, store_event
+from models import Handler, NetEvent, get_handler, store_event
 
 
 # How often to look at latest times and update LEDs and DB accordingly
@@ -25,15 +24,6 @@ _CHECK_PERIOD_S: Final = 0.2
 # the high beam. So we need to wait a bit and check that other events
 # aren't about to supercede a given one. This is that "wait time."
 _EVENT_WINDOW_S: Final = 1.0
-
-
-class NetEvent(Enum):
-    """A net event (i.e., UPPER means crossed lower, but did NOT hit)."""
-
-    HIT = 0
-    LOWER = 1
-    UPPER = 2
-
 
 # How to indicate a net event visually to player
 _NET_EVENT_LED_SIGNIFIERS: Final = {
