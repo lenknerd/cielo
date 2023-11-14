@@ -1,6 +1,6 @@
-# Cielo
+![Cielo](static/cielo-icon-192.png?raw=true "Cielo")
 
-Cielo is the ultimate lazy-day indoor game. It's a ball throwing game, but you can play it without getting up,
+`Cielo` is the ultimate lazy-day indoor game. It's a ball throwing game, but you can play it without getting up,
 and in fact the best position to play in is lying flat on your back on the floor, looking up at the celing.
 
 General idea:
