@@ -61,7 +61,7 @@ def get_handler(override_db: Optional[str] = None) -> Handler:
     return Handler(db_conn, db_cur)
 
 
-def start_new_game() -> None:
+def start_new_game(handler: Optional[Handler]) -> None:
     """Start a new game.
 
     Check if last game score needs to be updated, do that too if needed.
@@ -76,15 +76,21 @@ def start_new_game() -> None:
     if last_g_vals:  # If there is a last game (not clean slate)
         last_g_start_t, last_g_score = next(t_last_g_vals)
         if last_g_score is None:  # If the last score is not filled in
-            latest_score = 3  # TODO update
+            latest_score = _score_latest_game(handler)
             handler.cur.execute(f"UPDATE games SET end_score = {latest_score} "
                                 f"WHERE t_start = {last_g_start_t}")
-            handler.db_conn.commit()
+            handler.conn.commit()
 
     # Now start the new game
     handler.cur.execute("INSERT INTO games (t_start, duration_seconds) "
                         f"VALUES (UNIX_TIMESTAMP(), 60)")
-    handler.db_conn.commit()
+    handler.conn.commit()
+
+
+def _score_latest_game(handler: Optional[Handler]) -> int:
+    """Get the score from the latest game."""
+    # TODO write
+    return 0
 
 
 def store_event(handler: Optional[Handler],
@@ -95,7 +101,7 @@ def store_event(handler: Optional[Handler],
 
     handler.cur.execute("INSERT INTO events (kind, t_ref)"
                         f"VALUES ('{event_name}', {event_tstamp})")
-    handler.db_conn.commit()
+    handler.conn.commit()
 
 
 def get_high_score(handler: Optional[Handler]) -> int:
@@ -109,7 +115,11 @@ def get_high_score(handler: Optional[Handler]) -> int:
 def get_state() -> GameState:
     """Get the current game state."""
     # TODO do it
-    pass
+    return GameState(
+        events=[],
+        latest_score=_score_latest_game(),
+    )
+
 
 
 if __name__ == "__main__":
@@ -119,4 +129,4 @@ if __name__ == "__main__":
     print("High score so far:")
     print(get_high_score(handler))
     print("Okay let's start a game...")
-    start_new_game()
+    start_new_game(handler)
