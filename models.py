@@ -89,8 +89,8 @@ def start_new_game(handler: Optional[Handler]) -> None:
     handler.conn.commit()
 
 
-def _tally_game_w_start_t(handler: Optional[Handler], last_g_start_t: float
-                          ) -> Tuple[List[], int]:
+def _tally_game_w_start_t(handler: Optional[Handler], last_g_start_t: float,
+                          ) -> Tuple[List[EventTPair], int]:
     """Get events and score from the game with the given start time."""
     # TODO write
     return [], 0
