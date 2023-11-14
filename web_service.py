@@ -18,6 +18,28 @@ def index() -> str:
     return render_template("index.html")
 
 
+@app.route("/highscore")
+def highscore() -> str:
+    """Get the high score text (if any games so far)."""
+    return "No Games Yet"
+
+
+@app.route("/newgame")
+def newgame() -> str:
+    """Start a new game. No response really needed... but okay."""
+    return "Okay"
+
+
+@app.route("/feed")
+def feed() -> str:
+    return "Feed is going."
+
+
+@app.route("/summary")
+def summary() -> str:
+    return "Most recent score, or time left if game on, goes here."
+
+
 @click.command()
 @click.option("--debug/--no-debug",
               default="False",

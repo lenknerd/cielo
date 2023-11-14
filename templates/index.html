@@ -9,10 +9,27 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 	<link rel="stylesheet" href="{{ url_for('static', filename='cielo.css') }}">
   </head>
-  <body>
+  <body onload="update_high_score();">
+
+    <div class="container cielotop">
+      <img class="cieloicon" src="{{ url_for('static', filename='cielo-icon-192.png') }}"></img>
+      <p class="cielohighscore">Loading High Score...</p>
+    </div>
 
     <div class="container">
-      <p>Test hello</p>
+      <button type="button" class="btn btn-secondary cielonewgame">
+        New Game
+      </button>
+    </div>
+
+    <div class="container cielogamesummarycointainer">
+      <p class="cielogamesummary">Loading Game Status...</p>
+    </div>
+
+    <div class="container cielofeedcontainer card">
+      <div class="cielofeedinnerspacer">
+        <p class="cielofeed">Loading Game Feed...</p>
+      </div>
     </div>
 
 

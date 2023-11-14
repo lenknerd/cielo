@@ -1,1 +1,45 @@
 /* Styling for Cielo web app */
+
+
+/* Top of page with logo and high score side by side. */
+.cielotop {
+  display: grid;
+  align-items: center;
+  text-align: right;
+  grid-template-columns: 1fr 2fr;
+  column-gap: 5px;
+  padding-left: 12px;
+}
+
+.cieloicon {
+  max-width: 70%;
+  max-height:70%;
+}
+
+.cielohighscore {
+  color: #666547;
+  font-size: larger;
+}
+
+.cielonewgame {
+  font-size: larger;
+  margin-bottom: 20px;
+}
+
+/* The game time remaining game over/score headline */
+.cielogamesummary {
+  font-size: larger;
+}
+
+/* The main game feed where most text shows up */
+.cielofeedcontainer {
+  background-color: #e7fdea;
+  margin-left: 10px;
+  max-width: 95%;
+}
+
+.cielofeed {
+  font-size: larger;
+  padding-top: 15px;
+  padding-left: 10px;
+}
