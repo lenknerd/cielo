@@ -37,8 +37,6 @@ class NetEvent(Enum):
     UPPER = 2
 
 
-
-
 @dataclass
 class EventTPair:
     """Event and time at which it happened."""
@@ -68,8 +66,25 @@ def start_new_game() -> None:
 
     Check if last game score needs to be updated, do that too if needed.
     """
-    # If last game exists (nonempty table) and score not filled in, do it
-    pass
+    if not handler:
+        handler = get_handler()
+
+    # If last score not filled in, do it whenever new game starting.
+    # Note we do this even if a game is "going on still" because ending it
+    last_g_vals = handler.cur.execute("SELECT t_start, end_score FROM games "
+                                        "ORDER BY t_start DESC LIMIT 1")
+    if last_g_vals:  # If there is a last game (not clean slate)
+        last_g_start_t, last_g_score = next(t_last_g_vals)
+        if last_g_score is None:  # If the last score is not filled in
+            latest_score = 3  # TODO update
+            handler.cur.execute(f"UPDATE games SET end_score = {latest_score} "
+                                f"WHERE t_start = {last_g_start_t}")
+            handler.db_conn.commit()
+
+    # Now start the new game
+    handler.cur.execute("INSERT INTO games (t_start, duration_seconds) "
+                        f"VALUES (UNIX_TIMESTAMP(), 60)")
+    handler.db_conn.commit()
 
 
 def store_event(handler: Optional[Handler],
@@ -86,15 +101,22 @@ def store_event(handler: Optional[Handler],
 def get_high_score(handler: Optional[Handler]) -> int:
     """Get the highest score from the games table."""
     vals = handler.cur.execute("SELECT MAX(end_score) FROM games")
-    for val in vals:
-        return val[0]
+    if vals:
+        return next(val)[0]
     return 0  # No games recorded yet
 
 
 def get_state() -> GameState:
     """Get the current game state."""
+    # TODO do it
     pass
 
 
 if __name__ == "__main__":
-    print("Hi.")
+    print("Hi. Getting handler...")
+    handler = get_handler(override_db="cielo_test")
+    # Clear the database TODO to start off our test
+    print("High score so far:")
+    print(get_high_score(handler))
+    print("Okay let's start a game...")
+    start_new_game()
