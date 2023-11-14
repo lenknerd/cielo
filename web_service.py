@@ -4,10 +4,11 @@
 import logging
 from typing import Mapping, Optional
 
+import click
 import mariadb
 from flask import Flask, render_template
 
-import click
+import models
 
 
 app = Flask("cielo")
@@ -27,7 +28,7 @@ def index() -> str:
 @app.route("/highscore")
 def highscore() -> str:
     """Get the high score text (if any games so far)."""
-    return "No Games Yet"
+    return f"High Score: {models.get_high_score()}"
 
 
 @app.route("/newgame")
