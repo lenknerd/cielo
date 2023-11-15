@@ -99,7 +99,7 @@ def handle_cycle(db_handler: Handler,
             io_interf.set_on_for(_LED_DUR_S, _NET_EVENT_LED_SIGNIFIERS[relevant_event])
 
             # Record the event in the database for use in webapp
-            store_event(db_handler, relevant_event.name, event_tstamp)
+            store_event(db_handler, relevant_event.name, int(event_tstamp))
 
             print("Processed the event, report times as current (processed) state")
             return new_read_of_times

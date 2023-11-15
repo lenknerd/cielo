@@ -21,18 +21,17 @@ Log in and create the tables in the public schema;
     USE cielo;
     CREATE TABLE events (
       kind VARCHAR(20) NOT NULL,
-      t_ref FLOAT NOT NULL,
-      t_end FLOAT
+      t_ref INT NOT NULL,
+      t_end FLOAT,
+      INDEX(t_ref) -- query on latest events, in order
     );
     CREATE TABLE games (
-      t_start FLOAT NOT NULL,
-      duration_seconds FLOAT NOT NULL DEFAULT 60,
+      t_start INT NOT NULL,
+      duration_seconds INT NOT NULL DEFAULT 60,
       user VARCHAR(50),
-      end_score INT
+      end_score INT,
+      INDEX(t_start) -- query on latest games, in order
     );
     -- user isn't used currently
-
-    -- Also useful for getting latest events in order
-    ALTER TABLE events ADD INDEX (t_ref);
 
 Create the same things in a `cielo_test` database as well to test stuff.
