@@ -35,7 +35,7 @@ class Handler:
 
 
 class NetEvent(Enum):
-    """A net event (i.e., UPPER means crossed lower, but did NOT hit)."""
+    """A net event (i.e., UPPER means crossed lower and upper, but did NOT hit)."""
 
     HIT = 0
     LOWER = 1
@@ -63,7 +63,7 @@ def get_handler(override_db: Optional[str] = None) -> Handler:
     return Handler(db_conn, db_cur)
 
 
-# Information on latest game
+# Query for information on latest game
 _LATEST_GAME_Q: Final = """
 WITH last_g AS (
     SELECT * FROM games
@@ -72,6 +72,7 @@ WITH last_g AS (
 )
 SELECT last_g.t_start, last_g.end_score, last_g.duration_seconds, events.kind
 FROM last_g
+-- Left join here allows us to see if game going even if no events yet
 LEFT JOIN events ON events.t_ref >= last_g.t_start
     AND events.t_ref < last_g.t_start + last_g.duration_seconds
 """
@@ -87,24 +88,18 @@ def get_state(handler: Optional[Handler] = None) -> GameState:
     handler.cur.execute(_LATEST_GAME_Q)
 
     t_now = time.time()
-    try:
-        for g_t_start, g_end_score, g_dur_s, evt_kind in handler.cur:
-            # No events in the most recent game is possible, in which case
-            # we get start/score/dur but no event due to LEFT join above
-            if evt_kind is not None:
-                state.events.append(NetEvent[evt_kind])
-                print("Whee! Event found:", evt_kind)
+    for g_t_start, g_end_score, g_dur_s, evt_kind in handler.cur:
+        # No events in the most recent game is possible, in which case
+        # we get start/score/dur but no event due to LEFT join above
+        if evt_kind is not None:
+            state.events.append(NetEvent[evt_kind])
 
-            # These get re-asserted each iteration >0, but no harm...
-            state.game_t_start = g_t_start
-            t_left = g_t_start + g_dur_s - t_now
-            if t_left > 0:
-                state.time_remaining_s = t_left
-            state.latest_score = g_end_score
-
-    except TypeError:
-        print("derp.")
-        pass  # NoneType is not iterable - just means no games yet
+        # These get re-asserted each iteration >0, but no harm...
+        state.game_t_start = g_t_start
+        t_left = g_t_start + g_dur_s - t_now
+        if t_left > 0:
+            state.time_remaining_s = t_left
+        state.latest_score = g_end_score
 
     # If any games so far
     if state.game_t_start:
@@ -179,7 +174,7 @@ def store_event(handler: Optional[Handler],
 
 
 if __name__ == "__main__":
-
+    # In the below check the final score should be 12 as of current game consts
     print("Running tests. Getting handler...")
     handler = get_handler(override_db="cielo_test")
 

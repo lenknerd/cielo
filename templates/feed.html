@@ -1,0 +1,16 @@
+{% set badge_class = {
+  "UPPER": "success",
+  "LOWER": "secondary",
+  "HIT": "danger"
+} %}
+
+{% for event in events|reverse %}
+
+<p>
+  {{ loop.index }}. 
+  <span class="badge badge-{{ badge_class[event] }}">
+    event
+  </span>
+</p>
+
+{% endfor %}

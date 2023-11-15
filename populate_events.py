@@ -74,8 +74,7 @@ def get_net_event(times: LatestTimes, ref_time: float) -> Optional[Tuple[NetEven
 
 def handle_cycle(db_handler: Handler,
                  io_interf: CieloIO,
-                 times: LatestTimes,
-                 con) -> LatestTimes:
+                 times: LatestTimes) -> LatestTimes:
     """Handle one cycle of the read/process loop.
 
     Arguments:
@@ -131,7 +130,7 @@ def populate_events() -> None:
             print(f"Loop iteration {loop_iter}")
 
         # All the action is in here
-        times = handle_cycle(db_handler, io_interf, times, db_conn)
+        times = handle_cycle(db_handler, io_interf, times)
 
         time.sleep(_CHECK_PERIOD_S)
 

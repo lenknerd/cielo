@@ -2,7 +2,7 @@
 """The web service for the Cielo game."""
 
 import logging
-from typing import Mapping, Optional
+from typing import Any, Mapping, Optional
 
 import click
 import mariadb
@@ -14,39 +14,35 @@ import models
 app = Flask("cielo")
 
 
-def _start_newgame() -> None:
-    """Record a new game entry into the games table."""
-
-
-
 @app.route("/")
 def index() -> str:
     """The main landing page for the Cielo web app."""
     return render_template("index.html")
 
 
-@app.route("/highscore")
-def highscore() -> str:
-    """Get the high score text (if any games so far)."""
-    return f"High Score: {models.get_high_score()}"
-
-
 @app.route("/newgame")
 def newgame() -> str:
     """Start a new game. No response really needed... but okay."""
-    return "Okay"
+    models.start_new_game()
+    return "Okay."
 
 
 @app.route("/state")
-def state() -> Mapping[str, str]:
-    """Get the state of the game - the feed and summary.
+def state() -> Mapping[str, Any]:
+    """Get the state of the game - the feed, summary, and high score.
 
     Returns:
-        JSON-serializable {"feed": "text", "summary": "text"}
+        {
+            "feed": "<feed_html>...",
+            "summary": "text",
+            "highscore": "High Score: 123"
+        }
     """
+    state = models.get_state()
     return {
         "summary": "Most recent score, or time left.",
-        "feed": "Events...\nevents...\nmore events"
+        "feed": render_template("feed.html", events=[evt.name for evt in state.events]),
+        "highscore": "High Score: 12345"
     }
 
 
