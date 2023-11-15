@@ -16,7 +16,7 @@ import mariadb
 _CONN_INFO: Final = {
     "user": "cielo",
     "password": "cielo",
-    "database": "cielo_test",
+    "database": "cielo",
     "port": 3306,
     "host": "localhost",
 }
