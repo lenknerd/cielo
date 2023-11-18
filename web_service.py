@@ -33,16 +33,22 @@ def state() -> Mapping[str, Any]:
 
     Returns:
         {
-            "feed": "<feed_html>...",
-            "summary": "text",
+            "feed": "<feed_html>",
+            "summary": "Score: 12, X seconds left",
             "highscore": "High Score: 123"
         }
     """
     state = models.get_state()
+
+    summary = f"Score: {state.latest_score}"
+    if state.time_remaining_s:
+        summary += f" <br/> {int(state.time_remaining_s)} seconds left"
+        summary += f" <br/> Current Awards: {state.award_lower} / {state.award_upper}"
+
     return {
-        "summary": "Most recent score, or time left.",
+        "summary": summary,
         "feed": render_template("feed.html", events=[evt.name for evt in state.events]),
-        "highscore": "High Score: 12345"
+        "highscore": f"High Score: {state.high_score}",
     }
 
 

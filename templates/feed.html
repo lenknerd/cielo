@@ -7,9 +7,8 @@
 {% for event in events|reverse %}
 
 <p>
-  {{ loop.index }}. 
   <span class="badge badge-{{ badge_class[event] }}">
-    event
+    {{ event }}
   </span>
 </p>
 

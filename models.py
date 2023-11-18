@@ -122,7 +122,6 @@ def _fill_score_and_awards(handler: Handler, state: GameState) -> None:
 
     current_g_score = 0
     for event in state.events:
-        print("hmm yes iter...")
         if event == NetEvent.LOWER:
             # You get points equal to the award for lower beam cross
             current_g_score += state.award_lower
@@ -147,7 +146,6 @@ def _fill_score_and_awards(handler: Handler, state: GameState) -> None:
         handler.conn.commit()
         state.latest_score = current_g_score
 
-    print("Ya. Now score", current_g_score)
     state.latest_score = current_g_score
 
 
